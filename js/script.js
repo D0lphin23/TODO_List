@@ -5,47 +5,73 @@ const todoCompleted = document.querySelector(".todo-completed");
 
 const toDoData = [];
 
-const render = function () {
-  todoList.innerHTML = "";
-  todoCompleted.innerHTML = "";
+const loadedLocalStorage = function () {
+    const data = localStorage.getItem("toDoData");
 
-  toDoData.forEach((item) => {
-    const li = document.createElement("li");
-
-    li.classList.add("todo-item");
-
-    li.innerHTML =
-      '<span class="text-todo">' +
-      item.text +
-      "</span>" +
-      '<div class="todo-buttons">' +
-      '<button class="todo-remove"></button>' +
-      '<button class="todo-complete"></button>' +
-      "</div>";
-
-    if (item.completed) {
-      todoCompleted.append(li);
-    } else {
-      todoList.append(li);
+    if (data) {
+        toDoData.push(...JSON.parse(data));
+        render();
     }
+};
 
-    li.querySelector(".todo-complete").addEventListener("click", () => {
-      item.completed = !item.completed;
-      render();
+const render = function () {
+    todoList.innerHTML = "";
+    todoCompleted.innerHTML = "";
+
+    toDoData.forEach((item) => {
+        const li = document.createElement("li");
+
+        li.classList.add("todo-item");
+
+        li.innerHTML =
+            '<span class="text-todo">' +
+            item.text +
+            "</span>" +
+            '<div class="todo-buttons">' +
+            '<button class="todo-remove"></button>' +
+            '<button class="todo-complete"></button>' +
+            "</div>";
+
+        if (item.completed) {
+            todoCompleted.append(li);
+        } else {
+            todoList.append(li);
+        }
+
+        li.querySelector(".todo-complete").addEventListener("click", () => {
+            item.completed = !item.completed;
+            render();
+        });
+
+        li.querySelector(".todo-remove").addEventListener("click", () => {
+            const index = toDoData.indexOf(item);
+
+            if (index > -1) {
+                toDoData.splice(index, 1);
+                render();
+            }
+        });
     });
-  });
+
+    localStorage.setItem("toDoData", JSON.stringify(toDoData));
 };
 
 todoControl.addEventListener("submit", function (event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  const newToDo = {
-    text: headerInput.value,
-    completed: false,
-  };
+    if (headerInput.value === "") {
+        return;
+    }
 
-  toDoData.push(newToDo);
-  headerInput.value = "";
+    const newToDo = {
+        text: headerInput.value,
+        completed: false,
+    };
 
-  render();
+    toDoData.push(newToDo);
+    headerInput.value = "";
+
+    render();
 });
+
+loadedLocalStorage();
